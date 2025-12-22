@@ -75,17 +75,21 @@ program
       (im, index) => validateImsResults[index] && (hasImConfig ? config.im?.[im] : config[im]),
     ) as Im[];
 
-    // 批量通知
+    // 逐个通知
+    const allImNotifications: { platform: Platform; im: Im; success: boolean; error?: Error }[] = [];
     for (let i = 0; i < validPlatforms.length; i++) {
       if (uploadResults[i]) {
-        try {
-          await Promise.all(
-            ims.map((im) => imNotifyUpload(config, im, validPlatforms[i], uploadResults[i])),
-          );
-        } catch (error) {
-          logger.error(`通知【${platformMap[validPlatforms[i]]}】上传结果失败`);
-          if (error instanceof Error) {
-            logger.error(`错误信息: ${error.message}`);
+        for (const im of ims) {
+          try {
+            await imNotifyUpload(config, im, validPlatforms[i], uploadResults[i]);
+            logger.success(`【${im}】通知【${platformMap[validPlatforms[i]]}】上传结果成功`);
+            allImNotifications.push({ platform: validPlatforms[i], im, success: true });
+          } catch (error) {
+            logger.error(`【${im}】通知【${platformMap[validPlatforms[i]]}】上传结果失败`);
+            if (error instanceof Error) {
+              logger.error(`错误信息: ${error.message}`);
+              allImNotifications.push({ platform: validPlatforms[i], im, success: false, error });
+            }
           }
         }
       }
@@ -103,6 +107,23 @@ program
       logger.info(`失败平台: ${failedPlatforms.map(p => platformMap[p]).join(', ')}`);
     }
     logger.info('==================\n');
+
+    // 展示IM通知结果
+    if (allImNotifications.length > 0) {
+      logger.info('\n=== IM通知执行结果 ===');
+      logger.info(`总通知数: ${allImNotifications.length}`);
+      const successNotifications = allImNotifications.filter(n => n.success);
+      const failedNotifications = allImNotifications.filter(n => !n.success);
+      logger.success(`成功通知数: ${successNotifications.length}`);
+      if (successNotifications.length > 0) {
+        logger.info(`成功通知: ${successNotifications.map(n => `【${n.im}】-${platformMap[n.platform]}`).join(', ')}`);
+      }
+      logger.error(`失败通知数: ${failedNotifications.length}`);
+      if (failedNotifications.length > 0) {
+        logger.info(`失败通知: ${failedNotifications.map(n => `【${n.im}】-${platformMap[n.platform]}`).join(', ')}`);
+      }
+      logger.info('==================\n');
+    }
 
     // 结束
     logger.info('上传操作结束。');
@@ -170,17 +191,21 @@ program
       (im, index) => validateImsResults[index] && (hasImConfig ? config.im?.[im] : config[im]),
     ) as Im[];
 
-    // 批量通知
+    // 逐个通知
+    const allImNotifications: { platform: Platform; im: Im; success: boolean; error?: Error }[] = [];
     for (let i = 0; i < validPlatforms.length; i++) {
       if (previewResults[i]) {
-        try {
-          await Promise.all(
-            ims.map((im) => imNotifyPreview(config, im, validPlatforms[i], previewResults[i])),
-          );
-        } catch (error) {
-          logger.error(`通知【${platformMap[validPlatforms[i]]}】预览结果失败`);
-          if (error instanceof Error) {
-            logger.error(`错误信息: ${error.message}`);
+        for (const im of ims) {
+          try {
+            await imNotifyPreview(config, im, validPlatforms[i], previewResults[i]);
+            logger.success(`【${im}】通知【${platformMap[validPlatforms[i]]}】预览结果成功`);
+            allImNotifications.push({ platform: validPlatforms[i], im, success: true });
+          } catch (error) {
+            logger.error(`【${im}】通知【${platformMap[validPlatforms[i]]}】预览结果失败`);
+            if (error instanceof Error) {
+              logger.error(`错误信息: ${error.message}`);
+              allImNotifications.push({ platform: validPlatforms[i], im, success: false, error });
+            }
           }
         }
       }
@@ -199,11 +224,104 @@ program
     }
     logger.info('==================\n');
 
+    // 展示IM通知结果
+    if (allImNotifications.length > 0) {
+      logger.info('\n=== IM通知执行结果 ===');
+      logger.info(`总通知数: ${allImNotifications.length}`);
+      const successNotifications = allImNotifications.filter(n => n.success);
+      const failedNotifications = allImNotifications.filter(n => !n.success);
+      logger.success(`成功通知数: ${successNotifications.length}`);
+      if (successNotifications.length > 0) {
+        logger.info(`成功通知: ${successNotifications.map(n => `【${n.im}】-${platformMap[n.platform]}`).join(', ')}`);
+      }
+      logger.error(`失败通知数: ${failedNotifications.length}`);
+      if (failedNotifications.length > 0) {
+        logger.info(`失败通知: ${failedNotifications.map(n => `【${n.im}】-${platformMap[n.platform]}`).join(', ')}`);
+      }
+      logger.info('==================\n');
+    }
+
     // 结束
     logger.info('预览操作结束。');
 
     // 根据实际结果设置退出码
     if (failedPlatforms.length > 0) {
+      process.exit(1);
+    } else {
+      process.exit(0);
+    }
+  });
+
+program
+  .command('test-im')
+  .description('测试IM通知配置')
+  .option('--debug', '启用调试模式，显示详细日志')
+  .action(async (options) => {
+    const config = await loadConfig();
+
+    // 设置调试模式
+    const debugMode = Boolean(options.debug);
+    if (debugMode) {
+      logger.level = 'debug';
+    }
+
+    // 验证IM配置
+    const validateImsResults = imsValidate(config);
+
+    // 检查是否有im配置，如果有则使用，否则使用根级别的配置
+    const hasImConfig = config.im && Object.keys(config.im).length > 0;
+    const validIms = ['dingtalk', 'wecom'].filter(
+      (im, index) => validateImsResults[index] && (hasImConfig ? config.im?.[im] : config[im]),
+    ) as Im[];
+
+    if (validIms.length === 0) {
+      logger.warn('没有配置有效的IM渠道');
+      process.exit(1);
+    }
+
+    // 测试IM通知
+    logger.info(`开始测试IM通知，共${validIms.length}个渠道...`);
+    const testResult = '测试消息';
+    const testPlatform = platforms[0] as Platform; // 使用第一个平台作为测试平台
+
+    const successIms: Im[] = [];
+    const failedIms: Im[] = [];
+
+    for (const im of validIms) {
+      try {
+        logger.info(`开始测试【${im}】...`);
+        // 发送测试消息，使用预览通知类型
+        await imNotifyPreview(config, im, testPlatform, testResult);
+        successIms.push(im);
+        logger.success(`【${im}】测试成功`);
+      } catch (error) {
+        logger.error(`【${im}】测试失败`);
+        if (error instanceof Error) {
+          logger.error(`错误信息: ${error.message}`);
+        }
+        failedIms.push(im);
+        continue;
+      }
+    }
+
+    // 展示执行结果
+    logger.info('\n=== IM测试结果 ===');
+    logger.info(`总渠道数: ${validIms.length}`);
+    logger.success(`成功渠道数: ${successIms.length}`);
+    if (successIms.length > 0) {
+      logger.info(`成功渠道: ${successIms.join(', ')}`);
+    }
+    logger.error(`失败渠道数: ${failedIms.length}`);
+    if (failedIms.length > 0) {
+      logger.info(`失败渠道: ${failedIms.join(', ')}`);
+    }
+    logger.info('==================\n');
+
+    // 结束
+    logger.info('IM测试结束。');
+
+    // 根据实际结果设置退出码
+    if (failedIms.length > 0) {
       process.exit(1);
     } else {
       process.exit(0);

@@ -7,7 +7,7 @@ yarn-error.log*
 lerna-debug.log*
 pnpm-debug.log*
 run
-
+.trae
 # Diagnostic reports (https://nodejs.org/api/report.html)
 report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
 
@@ -82,7 +82,6 @@ package-lock.json
 .env.local
 .env.*.local
 *.local
-uni-deploy.config.ts
 
 # parcel-bundler cache (https://parceljs.org/)
 .cache
@@ -116,6 +115,7 @@ out
 # Nuxt.js build / generate output
 .nuxt
 dist
+uni-deploy.config.*
 
 # Rax.js build
 .rax
@@ -177,5 +177,4 @@ dist_ssg
 
 # Android
 *.keystore
-
 qrcode.png
