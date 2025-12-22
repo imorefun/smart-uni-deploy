@@ -12,7 +12,7 @@ export const defaultConfig: UniDeployConfig = {
 export const defineConfig = (config: UniDeployUserConfig) => config;
 
 export const loadEnvConfig = () => {
-  dotenvExpand.expand(dotenv.config());
+  dotenvExpand.expand(dotenv.config({ path: 'env/.env' }));
   const envConfig = {
     dingtalk: {
       webhook: process.env.DINGTALK_WEBHOOK,

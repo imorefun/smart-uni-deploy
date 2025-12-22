@@ -116,7 +116,7 @@ out
 .nuxt
 dist
 uni-deploy.config.*
-
+deployFile
 # Rax.js build
 .rax
 
