@@ -1,13 +1,14 @@
-import minidev from 'minidev';
-const { useDefaults } = minidev;
 import pRetry from 'p-retry';
-import { logger } from '../utils';
-import type { PRetryOptions, UniDeployConfig } from '../types';
+import execa from 'execa';
+import { logger } from '../utils.js';
+import type { PRetryOptions, UniDeployConfig } from '../types.js';
+
+// 直接使用minidev命令，让系统自动找到正确的路径
 
 export const mpAlipayValidate = (config: UniDeployConfig) => {
   let isValid = true;
   /* appid */
-  const appid = config?.['mp-alipay']?.appid;
+  const appid = config['mp-alipay']?.appid;
   if (!appid) {
     logger.warn('【支付宝小程序】缺少 appid');
     isValid = false;
@@ -39,40 +40,41 @@ export const mpAlipayValidate = (config: UniDeployConfig) => {
   return isValid;
 };
 
-export const mpAlipayGetProject = (config: UniDeployConfig) =>
-  useDefaults({
+export const mpAlipayGetProject = (config: UniDeployConfig) => {
+  return {
     config: {
       defaults: {
         'alipay.authentication.privateKey': config?.['mp-alipay']?.privateKey,
         'alipay.authentication.toolId': config?.['mp-alipay']?.toolId,
       },
     },
-  });
+  };
+};
 
 export const mpAlipayUpload = async (config: UniDeployConfig, pRetryOptions?: PRetryOptions) => {
-  mpAlipayGetProject(config);
-  const minidevInstance = minidev.minidev || minidev.default;
-  return pRetry(
-    () =>
-      minidevInstance.upload({
-        ...config?.['mp-alipay'],
-        appId: config?.['mp-alipay']?.appid!,
-        project: config?.['mp-alipay']?.projectPath,
-      }),
-    pRetryOptions,
-  );
+  // 直接调用minidev的CLI命令来执行上传
+  const { appid, projectPath, version } = config['mp-alipay'] ?? {};
+
+  return pRetry(async () => {
+    // 构建minidev上传命令，只使用必要的参数
+    const command = `npx minidev upload --app-id ${appid} --project "${projectPath}" --version ${version} --desc "Handled by uni-deploy"`;
+
+    // 执行命令，使用shell:true来让系统处理命令查找
+    const result = await execa(command, { shell: true, stdio: 'inherit' });
+    return result;
+  }, pRetryOptions);
 };
 
 export const mpAlipayPreview = async (config: UniDeployConfig, pRetryOptions?: PRetryOptions) => {
-  mpAlipayGetProject(config);
-  const minidevInstance = minidev.minidev || minidev.default;
-  return pRetry(
-    () =>
-      minidevInstance.preview({
-        ...config?.['mp-alipay'],
-        appId: config?.['mp-alipay']?.appid!,
-        project: config?.['mp-alipay']?.projectPath,
-      }),
-    pRetryOptions,
-  );
+  // 直接调用minidev的CLI命令来执行预览
+  const { appid, projectPath } = config['mp-alipay'] ?? {};
+
+  return pRetry(async () => {
+    // 构建minidev预览命令，只使用必要的参数
+    const command = `npx minidev preview --app-id ${appid} --project "${projectPath}"`;
+
+    // 执行命令，使用shell:true来让系统处理命令查找
+    const result = await execa(command, { shell: true, stdio: 'inherit' });
+    return result;
+  }, pRetryOptions);
 };

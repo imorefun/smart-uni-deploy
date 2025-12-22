@@ -1,5 +1,5 @@
-import { mpAlipayPreview, mpAlipayUpload, mpAlipayValidate } from './mp-alipay';
-import { mpWeixinPreview, mpWeixinUpload, mpWeixinValidate } from './mp-weixin';
+import { mpAlipayPreview, mpAlipayUpload, mpAlipayValidate } from './mp-alipay.js';
+import { mpWeixinPreview, mpWeixinUpload, mpWeixinValidate } from './mp-weixin.js';
 import type {
   Platform,
   PlatformPreview,
@@ -11,7 +11,7 @@ import type {
   PlatformValidateMap,
   PRetryOptions,
   UniDeployConfig,
-} from '../types';
+} from '../types.js';
 
 export * from './mp-alipay';
 export * from './mp-weixin';

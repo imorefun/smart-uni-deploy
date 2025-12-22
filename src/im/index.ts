@@ -1,5 +1,5 @@
-import { dingtalkNotifyPreview, dingtalkNotifyUpload, dingtalkValidate } from './dingtalk';
-import { wecomNotifyPreview, wecomNotifyUpload, wecomValidate } from './wecom';
+import { dingtalkNotifyPreview, dingtalkNotifyUpload, dingtalkValidate } from './dingtalk.js';
+import { wecomNotifyPreview, wecomNotifyUpload, wecomValidate } from './wecom.js';
 import type {
   Im,
   ImNotifyPreview,
@@ -9,7 +9,7 @@ import type {
   ImValidate,
   ImValidateMap,
   UniDeployConfig,
-} from '../types';
+} from '../types.js';
 
 export * from './dingtalk';
 export * from './wecom';

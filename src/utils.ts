@@ -14,16 +14,16 @@ const pinoPrettyStream = pinoPretty({
 
 // 创建支持日志级别控制的 logger，默认日志级别为 info
 export const logger = pino({
-  level: 'info',
   customLevels: {
-    success: 35,
     error: 50,
+    success: 35,
   },
   formatters: {
     level: (label) => {
       return { level: label };
     },
   },
+  level: 'info',
 }, pinoPrettyStream);
 
 // 扩展 logger 方法，添加 success 方法

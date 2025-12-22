@@ -68,7 +68,7 @@ export interface MpAlipayConfig {
   /** 是否自动推送到客户端 */
   autoPush?: boolean;
   /** 自定义启动参数 */
-  launchParams?: any;
+  launchParams?: Record<string, any>;
   /** 移动应用 ID */
   ampeProductId?: string;
   /** 设备 ID */
@@ -222,7 +222,7 @@ export interface UniDeployConfig {
   /** 其他配置 */
   [key: string]: any;
 }
-export interface UniDeployUserConfig extends Partial<UniDeployConfig> {}
+export type UniDeployUserConfig = Partial<UniDeployConfig>;
 
 export { type ExtendOptions as GotOptions } from 'got';
 export { type Options as PRetryOptions } from 'p-retry';

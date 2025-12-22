@@ -11,8 +11,15 @@ export const defaultConfig: UniDeployConfig = {
 
 export const defineConfig = (config: UniDeployUserConfig) => config;
 
-export const loadEnvConfig = () => {
-  dotenvExpand.expand(dotenv.config({ path: 'env/.env' }));
+export const loadEnvConfig = (loadEnvFile = true) => {
+  // 尝试加载环境变量文件，但忽略错误
+  if (loadEnvFile) {
+    try {
+      dotenvExpand.expand(dotenv.config({ path: 'env/.env' }));
+    } catch (error) {
+      // 忽略错误，继续执行
+    }
+  }
   const envConfig = {
     dingtalk: {
       webhook: process.env.DINGTALK_WEBHOOK,
@@ -29,7 +36,7 @@ export const loadEnvConfig = () => {
       webhook: process.env.WECOM_WEBHOOK,
     },
   };
-  return JSON.parse(JSON.stringify(envConfig)) as UniDeployUserConfig;
+  return structuredClone(envConfig) as UniDeployUserConfig;
 };
 
 export const loadConfig = async (inlineConfig: UniDeployUserConfig = {}, cwd = process.cwd()) => {
@@ -44,8 +51,8 @@ export const loadConfig = async (inlineConfig: UniDeployUserConfig = {}, cwd = p
   });
 
   // 提取im配置
-  const loadedImConfig = loadedConfig.im || {};
-  const inlineImConfig = inlineConfig.im || {};
+  const loadedImConfig = loadedConfig.im ?? {};
+  const inlineImConfig = inlineConfig.im ?? {};
 
   // 合并钉钉配置：envConfig.dingtalk -> loadedConfig.dingtalk -> loadedConfig.im.dingtalk -> inlineConfig.dingtalk -> inlineConfig.im.dingtalk
   const mergedDingtalkConfig = {
@@ -146,5 +153,5 @@ export const loadConfig = async (inlineConfig: UniDeployUserConfig = {}, cwd = p
     },
   };
 
-  return JSON.parse(JSON.stringify(resolved));
+  return structuredClone(resolved);
 };

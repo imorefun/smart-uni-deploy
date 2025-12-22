@@ -2,11 +2,11 @@ import { existsSync } from 'node:fs';
 import ci from 'miniprogram-ci';
 const { Project } = ci;
 import pRetry from 'p-retry';
-import { logger } from '../utils';
-import type { PRetryOptions, UniDeployConfig } from '../types';
+import { logger } from '../utils.js';
+import type { PRetryOptions, UniDeployConfig } from '../types.js';
 
 type WechatCreateProjectOptions = ConstructorParameters<typeof Project>[0];
-type WechatUploadOptions = import('miniprogram-ci/dist/@types/ci/upload').IUploadOptions;
+type WechatUploadOptions = any;
 interface WechatUploadResult {
   devPluginId?: string;
   pluginInfo?: { pluginProviderAppid: string; size: number; version: string; }[];
@@ -58,31 +58,31 @@ export const mpWeixinUpload = async (config: UniDeployConfig, pRetryOptions?: PR
     () =>
       ci.upload({
         ...config?.['mp-weixin'],
-        project: mpWeixinGetProject(config),
-        onProgressUpdate: config?.['mp-weixin']?.onProgressUpdate || ((task) => {
+        onProgressUpdate: config?.['mp-weixin']?.onProgressUpdate ?? ((task) => {
           if (typeof task === 'string') {
             logger.debug(`【微信小程序】${task}`);
           } else {
             logger.debug(`【微信小程序】${task.message} (${task.status})`);
           }
         }),
+        project: mpWeixinGetProject(config),
       } as WechatUploadOptions),
     pRetryOptions,
   ) as Promise<WechatUploadResult>;
 
-export const mpWeixinPreview = async (config: UniDeployConfig, pRetryOptions?: PRetryOptions) =>
+export const mpWeixinPreview = async (config: UniDeployConfig, pRetryOptions?: PRetryOptions): Promise<any> =>
   pRetry(
     () =>
       ci.preview({
         ...config?.['mp-weixin'],
-        project: mpWeixinGetProject(config),
-        onProgressUpdate: config?.['mp-weixin']?.onProgressUpdate || ((task) => {
+        onProgressUpdate: config?.['mp-weixin']?.onProgressUpdate ?? ((task) => {
           if (typeof task === 'string') {
             logger.debug(`【微信小程序】${task}`);
           } else {
             logger.debug(`【微信小程序】${task.message} (${task.status})`);
           }
         }),
+        project: mpWeixinGetProject(config),
       } as WechatUploadOptions & { test?: true }),
     pRetryOptions,
   );

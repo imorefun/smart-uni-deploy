@@ -35,7 +35,7 @@ describe('config', () => {
     // 设置环境变量
     Object.assign(process.env, mockEnvVars);
 
-    const result = loadEnvConfig();
+    const result = loadEnvConfig(false);
 
     expect(result).toEqual({
       dingtalk: {
@@ -56,7 +56,18 @@ describe('config', () => {
   });
 
   it('loadEnvConfig with no env vars', () => {
-    const result = loadEnvConfig();
+    // 保存原始环境变量
+    const originalEnv = { ...process.env };
+
+    // 清除所有相关环境变量
+    delete process.env.DINGTALK_WEBHOOK;
+    delete process.env.MP_ALIPAY_PRIVATE_KEY;
+    delete process.env.MP_ALIPAY_TOOL_ID;
+    delete process.env.MP_WEIXIN_PRIVATE_KEY;
+    delete process.env.MP_WEIXIN_PRIVATE_KEY_PATH;
+    delete process.env.WECOM_WEBHOOK;
+
+    const result = loadEnvConfig(false);
 
     expect(result).toEqual({
       dingtalk: {
@@ -74,6 +85,9 @@ describe('config', () => {
         webhook: undefined,
       },
     });
+
+    // 恢复原始环境变量
+    process.env = originalEnv;
   });
 
   it('loadConfig with inline config', async () => {
