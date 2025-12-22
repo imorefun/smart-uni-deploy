@@ -1,9 +1,8 @@
-import * as _mindev from 'minidev';
+import minidev from 'minidev';
+const { useDefaults } = minidev;
 import pRetry from 'p-retry';
-import { PRetryOptions, UniDeployConfig } from '../types';
 import { logger } from '../utils';
-
-const { minidev, useDefaults } = _mindev;
+import type { PRetryOptions, UniDeployConfig } from '../types';
 
 export const mpAlipayValidate = (config: UniDeployConfig) => {
   let isValid = true;
@@ -52,11 +51,12 @@ export const mpAlipayGetProject = (config: UniDeployConfig) =>
 
 export const mpAlipayUpload = async (config: UniDeployConfig, pRetryOptions?: PRetryOptions) => {
   mpAlipayGetProject(config);
+  const minidevInstance = minidev.minidev || minidev.default;
   return pRetry(
     () =>
-      minidev.upload({
+      minidevInstance.upload({
         ...config?.['mp-alipay'],
-        appId: config?.['mp-alipay']?.appid as string,
+        appId: config?.['mp-alipay']?.appid!,
         project: config?.['mp-alipay']?.projectPath,
       }),
     pRetryOptions,
@@ -65,11 +65,12 @@ export const mpAlipayUpload = async (config: UniDeployConfig, pRetryOptions?: PR
 
 export const mpAlipayPreview = async (config: UniDeployConfig, pRetryOptions?: PRetryOptions) => {
   mpAlipayGetProject(config);
+  const minidevInstance = minidev.minidev || minidev.default;
   return pRetry(
     () =>
-      minidev.preview({
+      minidevInstance.preview({
         ...config?.['mp-alipay'],
-        appId: config?.['mp-alipay']?.appid as string,
+        appId: config?.['mp-alipay']?.appid!,
         project: config?.['mp-alipay']?.projectPath,
       }),
     pRetryOptions,

@@ -1,15 +1,15 @@
+import { dingtalkNotifyPreview, dingtalkNotifyUpload, dingtalkValidate } from './dingtalk';
+import { wecomNotifyPreview, wecomNotifyUpload, wecomValidate } from './wecom';
 import type {
-  UniDeployConfig,
   Im,
-  ImValidateMap,
-  ImNotifyUploadMap,
+  ImNotifyPreview,
   ImNotifyPreviewMap,
   ImNotifyUpload,
-  ImNotifyPreview,
+  ImNotifyUploadMap,
   ImValidate,
+  ImValidateMap,
+  UniDeployConfig,
 } from '../types';
-import { dingtalkNotifyUpload, dingtalkNotifyPreview, dingtalkValidate } from './dingtalk';
-import { wecomNotifyUpload, wecomNotifyPreview, wecomValidate } from './wecom';
 
 export * from './dingtalk';
 export * from './wecom';
@@ -17,18 +17,18 @@ export * from './wecom';
 export const ims: Im[] = ['dingtalk', 'wecom'];
 
 export const imValidateMap: ImValidateMap = {
-  wecom: wecomValidate,
   dingtalk: dingtalkValidate,
+  wecom: wecomValidate,
 };
 
 export const imNotifyUploadMap: ImNotifyUploadMap = {
-  wecom: wecomNotifyUpload,
   dingtalk: dingtalkNotifyUpload,
+  wecom: wecomNotifyUpload,
 };
 
 export const imNotifyPreviewMap: ImNotifyPreviewMap = {
-  wecom: wecomNotifyPreview,
   dingtalk: dingtalkNotifyPreview,
+  wecom: wecomNotifyPreview,
 };
 
 export const imValidate: ImValidate = (config: UniDeployConfig, im: Im) =>

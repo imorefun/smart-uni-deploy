@@ -1,65 +1,9 @@
-import type { MiniProgramCI as Wechat } from 'miniprogram-ci/dist/@types/types';
 import type { EBuildTarget as AlipayBuildTarget } from 'minidev';
+import type { MiniProgramCI as Wechat } from 'miniprogram-ci/dist/@types/types';
 
-import type { Options as PRetryOptions } from 'p-retry';
 import type { ExtendOptions as GotOptions } from 'got';
+import type { Options as PRetryOptions } from 'p-retry';
 
-export type Platform = 'mp-weixin' | 'mp-alipay';
-export type PlatformTextMap = Record<Platform, string>;
-export interface MpWeixinConfig {
-  /** 项目 appid，会尝试搜索 project.config.json 和 manifest.json 并将其中微信小程序字段的 appid 作为默认值 */
-  appid?: string;
-  /** 项目路径，会尝试搜索 project.config.json 并将其目录作为默认值 */
-  projectPath?: string;
-  /**
-   * 请阅读 https://developers.weixin.qq.com/miniprogram/dev/devtools/ci.html
-   *
-   * @deprecated 不建议使用，建议在 .env 或 process.env 设置 MP_WEIXIN_PRIVATE_KEY
-   */
-  privateKey?: string;
-  /**
-   * 请阅读 https://developers.weixin.qq.com/miniprogram/dev/devtools/ci.html
-   *
-   * @deprecated 不建议使用，建议在 .env 或 process.env 设置 MP_WEIXIN_PRIVATE_KEY_PATH
-   */
-  privateKeyPath?: string;
-  /** 项目类型，默认为 miniProgram */
-  type?: Wechat.ProjectType;
-  /** 需要排除的路径 */
-  ignores?: string[];
-  /**
-   * 项目版本，会尝试搜索 package.json 和 manifest.json，并将 version (package.json) 或 versionName (manifest.json)
-   * 作为默认值
-   */
-  version?: string;
-  /** 编译设置，会尝试搜索 project.config.json，并将 setting 作为默认值 */
-  setting?: Wechat.ICompileSettings;
-  /** 备注，默认为 Handled by uni-deploy */
-  desc?: string;
-  /** 使用的机器人，可选 1 - 30 */
-  robot?: number;
-  /** 编译过程中开启的线程数 */
-  threads?: number;
-  /** 是否使用异步方式上传，当代码包大于 5MB 时，默认开启 */
-  useCOS?: boolean;
-  /** 是否允许过滤无依赖文件，默认开启 */
-  allowIgnoreUnusedFiles?: boolean;
-  /** 进度更新监听函数 */
-  onProgressUpdate?: (task: Wechat.ITaskStatus | string) => void;
-  /** 预览时主包、分包体积上限是否调整为4M */
-  bigPackageSizeSupport?: boolean;
-  /** 二维码文件的格式，默认为 image */
-  qrcodeFormat?: 'base64' | 'image' | 'terminal';
-  /** 二维码文件保存路径，默认为 qrcode.png */
-  qrcodeOutputDest?: string;
-  /** 预览页面路径 */
-  pagePath?: string;
-  /** 预览页面路径启动参数 */
-  searchQuery?: string;
-  /** 默认值 1011，具体含义见 https://developers.weixin.qq.com/miniprogram/dev/reference/scene-list.html */
-  scene?: number;
-  test?: boolean;
-}
 export interface MpAlipayConfig {
   /**
    * 项目 appid，会尝试搜索 mini.project.json 和 manifest.json，并将 appid (mini.project.json) 或 mp-alipay.appid
@@ -96,7 +40,7 @@ export interface MpAlipayConfig {
   /** 上传时需要删除的版本号 */
   deleteVersion?: string;
   /** 强制构建类别，默认为 v2 */
-  appxv?: 'v1' | 'v2' | 'legacy-v1';
+  appxv?: 'legacy-v1' | 'v1' | 'v2';
   /** 构建缓存路径, 默认为系统缓存路径 */
   cacheDir?: string;
   /** 产物路径 */
@@ -142,96 +86,120 @@ export interface MpAlipayConfig {
   /** 模拟更新 */
   simulateUpdate?: boolean;
 }
-export interface PlatformValidate {
-  (config: UniDeployConfig, platform: Platform): boolean;
+export interface MpWeixinConfig {
+  /** 项目 appid，会尝试搜索 project.config.json 和 manifest.json 并将其中微信小程序字段的 appid 作为默认值 */
+  appid?: string;
+  /** 项目路径，会尝试搜索 project.config.json 并将其目录作为默认值 */
+  projectPath?: string;
+  /**
+   * 请阅读 https://developers.weixin.qq.com/miniprogram/dev/devtools/ci.html
+   *
+   * @deprecated 不建议使用，建议在 .env 或 process.env 设置 MP_WEIXIN_PRIVATE_KEY
+   */
+  privateKey?: string;
+  /**
+   * 请阅读 https://developers.weixin.qq.com/miniprogram/dev/devtools/ci.html
+   *
+   * @deprecated 不建议使用，建议在 .env 或 process.env 设置 MP_WEIXIN_PRIVATE_KEY_PATH
+   */
+  privateKeyPath?: string;
+  /** 项目类型，默认为 miniProgram */
+  type?: Wechat.ProjectType;
+  /** 需要排除的路径 */
+  ignores?: string[];
+  /**
+   * 项目版本，会尝试搜索 package.json 和 manifest.json，并将 version (package.json) 或 versionName (manifest.json)
+   * 作为默认值
+   */
+  version?: string;
+  /** 编译设置，会尝试搜索 project.config.json，并将 setting 作为默认值 */
+  setting?: Wechat.ICompileSettings;
+  /** 备注，默认为 Handled by uni-deploy */
+  desc?: string;
+  /** 使用的机器人，可选 1 - 30 */
+  robot?: number;
+  /** 编译过程中开启的线程数 */
+  threads?: number;
+  /** 是否使用异步方式上传，当代码包大于 5MB 时，默认开启 */
+  useCOS?: boolean;
+  /** 是否允许过滤无依赖文件，默认开启 */
+  allowIgnoreUnusedFiles?: boolean;
+  /** 进度更新监听函数 */
+  onProgressUpdate?: (task: string | Wechat.ITaskStatus) => void;
+  /** 预览时主包、分包体积上限是否调整为4M */
+  bigPackageSizeSupport?: boolean;
+  /** 二维码文件的格式，默认为 image */
+  qrcodeFormat?: 'base64' | 'image' | 'terminal';
+  /** 二维码文件保存路径，默认为 qrcode.png */
+  qrcodeOutputDest?: string;
+  /** 预览页面路径 */
+  pagePath?: string;
+  /** 预览页面路径启动参数 */
+  searchQuery?: string;
+  /** 默认值 1011，具体含义见 https://developers.weixin.qq.com/miniprogram/dev/reference/scene-list.html */
+  scene?: number;
+  test?: boolean;
 }
-export interface SpecificPlatformValidate {
-  (config: UniDeployConfig): boolean;
-}
-export type PlatformValidateMap = Record<Platform, SpecificPlatformValidate>;
-export interface PlatformUpload {
-  (config: UniDeployConfig, platform: Platform, pRetryOptions?: PRetryOptions): Promise<any>;
-}
-export interface SpecificPlatformUpload {
-  (config: UniDeployConfig, pRetryOptions?: PRetryOptions): Promise<any>;
-}
-export type PlatformUploadMap = Record<Platform, SpecificPlatformUpload>;
-export interface PlatformPreview {
-  (config: UniDeployConfig, platform: Platform, pRetryOptions?: PRetryOptions): Promise<any>;
-}
-export interface SpecificPlatformPreview {
-  (config: UniDeployConfig, pRetryOptions?: PRetryOptions): Promise<any>;
-}
+export type Platform = 'mp-alipay' | 'mp-weixin';
+export type PlatformPreview = (config: UniDeployConfig, platform: Platform, pRetryOptions?: PRetryOptions) => Promise<any>;
 export type PlatformPreviewMap = Record<Platform, SpecificPlatformPreview>;
+export type PlatformTextMap = Record<Platform, string>;
+export type PlatformUpload = (config: UniDeployConfig, platform: Platform, pRetryOptions?: PRetryOptions) => Promise<any>;
+export type PlatformUploadMap = Record<Platform, SpecificPlatformUpload>;
+export type PlatformValidate = (config: UniDeployConfig, platform: Platform) => boolean;
+export type PlatformValidateMap = Record<Platform, SpecificPlatformValidate>;
+export type SpecificPlatformPreview = (config: UniDeployConfig, pRetryOptions?: PRetryOptions) => Promise<any>;
+export type SpecificPlatformUpload = (config: UniDeployConfig, pRetryOptions?: PRetryOptions) => Promise<any>;
+export type SpecificPlatformValidate = (config: UniDeployConfig) => boolean;
 
-export type Im = 'wecom' | 'dingtalk';
-export interface ImConfig {
-  /** @deprecated 机器人 webhook，建议在 .env 或 process.env 设置 */
-  webhook?: string | string[];
-}
 export interface DingtalkConfig extends ImConfig {
   /** @deprecated 机器人 webhook，建议在 .env 或 process.env 设置 DINGTALK_WEBHOOK */
   webhook?: string | string[];
 }
+export type Im = 'dingtalk' | 'wecom';
+export interface ImConfig {
+  /** @deprecated 机器人 webhook，建议在 .env 或 process.env 设置 */
+  webhook?: string | string[];
+}
+export type ImNotifyPreview = (
+    config: UniDeployConfig,
+    im: Im,
+    platform: Platform,
+    result: any | Promise<any>,
+    buildGotOptions?: ImNotifyPreviewBuildGotOptions,
+  ) => Promise<any>;
+export type ImNotifyPreviewBuildGotOptions = (config: UniDeployConfig, im: Im, platform: Platform, result: any | Promise<any>) => GotOptions;
+export type ImNotifyPreviewMap = Record<Im, SpecificImNotifyPreview>;
+export type ImNotifyUpload = (
+    config: UniDeployConfig,
+    im: Im,
+    platform: Platform,
+    result: any | Promise<any>,
+    buildGotOptions?: ImNotifyUploadBuildGotOptions,
+  ) => Promise<any>;
+export type ImNotifyUploadBuildGotOptions = (config: UniDeployConfig, im: Im, platform: Platform, result: any | Promise<any>) => GotOptions;
+export type ImNotifyUploadMap = Record<Im, SpecificImNotifyUpload>;
+export type ImValidate = (config: UniDeployConfig, im: Im) => boolean;
+export type ImValidateMap = Record<Im, SpecificImValidate>;
+export type SpecificImNotifyPreview = (
+    config: UniDeployConfig,
+    platform: Platform,
+    result: any | Promise<any>,
+    buildGotOptions?: SpecificImNotifyPreviewBuildGotOptions,
+  ) => Promise<any>;
+export type SpecificImNotifyPreviewBuildGotOptions = (config: UniDeployConfig, platform: Platform, result: any | Promise<any>) => GotOptions;
+export type SpecificImNotifyUpload = (
+    config: UniDeployConfig,
+    platform: Platform,
+    result: any | Promise<any>,
+    buildGotOptions?: SpecificImNotifyUploadBuildGotOptions,
+  ) => Promise<any>;
+export type SpecificImNotifyUploadBuildGotOptions = (config: UniDeployConfig, platform: Platform, result: any | Promise<any>) => GotOptions;
+export type SpecificImValidate = (config: UniDeployConfig) => boolean;
 export interface WecomConfig extends ImConfig {
   /** @deprecated 机器人 webhook，建议在 .env 或 process.env 设置 WECOM_WEBHOOK */
   webhook?: string | string[];
 }
-export interface ImValidate {
-  (config: UniDeployConfig, im: Im): boolean;
-}
-export interface SpecificImValidate {
-  (config: UniDeployConfig): boolean;
-}
-export type ImValidateMap = Record<Im, SpecificImValidate>;
-export interface ImNotifyUploadBuildGotOptions {
-  (config: UniDeployConfig, im: Im, platform: Platform, result: Promise<any> | any): GotOptions;
-}
-export interface ImNotifyUpload {
-  (
-    config: UniDeployConfig,
-    im: Im,
-    platform: Platform,
-    result: Promise<any> | any,
-    buildGotOptions?: ImNotifyUploadBuildGotOptions,
-  ): Promise<any>;
-}
-export interface SpecificImNotifyUploadBuildGotOptions {
-  (config: UniDeployConfig, platform: Platform, result: Promise<any> | any): GotOptions;
-}
-export interface SpecificImNotifyUpload {
-  (
-    config: UniDeployConfig,
-    platform: Platform,
-    result: Promise<any> | any,
-    buildGotOptions?: SpecificImNotifyUploadBuildGotOptions,
-  ): Promise<any>;
-}
-export type ImNotifyUploadMap = Record<Im, SpecificImNotifyUpload>;
-export interface ImNotifyPreviewBuildGotOptions {
-  (config: UniDeployConfig, im: Im, platform: Platform, result: Promise<any> | any): GotOptions;
-}
-export interface ImNotifyPreview {
-  (
-    config: UniDeployConfig,
-    im: Im,
-    platform: Platform,
-    result: Promise<any> | any,
-    buildGotOptions?: ImNotifyPreviewBuildGotOptions,
-  ): Promise<any>;
-}
-export interface SpecificImNotifyPreviewBuildGotOptions {
-  (config: UniDeployConfig, platform: Platform, result: Promise<any> | any): GotOptions;
-}
-export interface SpecificImNotifyPreview {
-  (
-    config: UniDeployConfig,
-    platform: Platform,
-    result: Promise<any> | any,
-    buildGotOptions?: SpecificImNotifyPreviewBuildGotOptions,
-  ): Promise<any>;
-}
-export type ImNotifyPreviewMap = Record<Im, SpecificImNotifyPreview>;
 
 export interface UniDeployConfig {
   /** 进程的当前工作目录，默认为 process.cwd() */
@@ -244,9 +212,17 @@ export interface UniDeployConfig {
   dingtalk?: DingtalkConfig;
   /** 企业微信配置 */
   wecom?: WecomConfig;
+  /** 通知配置 */
+  im?: {
+    /** 钉钉配置 */
+    dingtalk?: DingtalkConfig;
+    /** 企业微信配置 */
+    wecom?: WecomConfig;
+  };
+  /** 其他配置 */
   [key: string]: any;
 }
 export interface UniDeployUserConfig extends Partial<UniDeployConfig> {}
 
-export { type Options as PRetryOptions } from 'p-retry';
 export { type ExtendOptions as GotOptions } from 'got';
+export { type Options as PRetryOptions } from 'p-retry';

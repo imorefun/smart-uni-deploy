@@ -1,10 +1,10 @@
-import { resolve } from 'node:path';
 import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 import { globbySync } from 'globby';
-import stripJsonComments from 'strip-json-comments';
 import { get } from 'lodash-es';
 import pino from 'pino';
 import pinoPretty from 'pino-pretty';
+import stripJsonComments from 'strip-json-comments';
 
 const pinoPrettyStream = pinoPretty({
   colorize: true,
@@ -12,14 +12,31 @@ const pinoPrettyStream = pinoPretty({
   translateTime: 'SYS:standard',
 });
 
-export const logger = pino(pinoPrettyStream);
+// 创建支持日志级别控制的 logger，默认日志级别为 info
+export const logger = pino({
+  level: 'info',
+  customLevels: {
+    success: 35,
+    error: 50,
+  },
+  formatters: {
+    level: (label) => {
+      return { level: label };
+    },
+  },
+}, pinoPrettyStream);
+
+// 扩展 logger 方法，添加 success 方法
+logger.success = (msg: string, ...args: any[]) => {
+  logger.info(msg, ...args);
+};
 
 const globbyIgnore = ['**/node_modules', '**/dist', '**/.hbuilder', '**/.hbuilderx'];
 
 export const getFileField = (
   filters: { entry: string | string[]; prop: string | string[] }[],
   cwd = process.cwd(),
-): string | number | boolean | Array<any> | Record<string, any> | undefined => {
+): boolean | number | string | any[] | Record<string, any> | undefined => {
   const entries = globbySync(
     filters.map((f) => (Array.isArray(f.entry) ? resolve(cwd, ...f.entry) : resolve(cwd, f.entry))),
     { ignore: globbyIgnore },

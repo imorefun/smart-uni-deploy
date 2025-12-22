@@ -55,6 +55,7 @@ web_modules
 
 # Optional npm cache directory
 .npm
+package-lock.json
 
 # Optional eslint cache
 .eslintcache
@@ -81,6 +82,7 @@ web_modules
 .env.local
 .env.*.local
 *.local
+uni-deploy.config.ts
 
 # parcel-bundler cache (https://parceljs.org/)
 .cache
@@ -175,3 +177,5 @@ dist_ssg
 
 # Android
 *.keystore
+
+qrcode.png

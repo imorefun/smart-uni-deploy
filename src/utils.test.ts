@@ -1,6 +1,6 @@
-import { resolve, dirname } from 'node:path';
+import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { describe, it, expect } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import { getFileDir, getFileField, getFilePath } from './utils';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));

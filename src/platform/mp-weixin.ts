@@ -1,11 +1,18 @@
 import { existsSync } from 'node:fs';
 import ci from 'miniprogram-ci';
+const { Project } = ci;
 import pRetry from 'p-retry';
-import { ICreateProjectOptions as WechatCreateProjectOptions } from 'miniprogram-ci/dist/@types/ci/project';
-import { IInnerUploadOptions as WechatUploadOptions } from 'miniprogram-ci/dist/@types/ci/upload';
-import type { IInnerUploadResult as WechatUploadResult } from 'miniprogram-ci/dist/@types/ci/upload';
 import { logger } from '../utils';
-import type { UniDeployConfig, PRetryOptions } from '../types';
+import type { PRetryOptions, UniDeployConfig } from '../types';
+
+type WechatCreateProjectOptions = ConstructorParameters<typeof Project>[0];
+type WechatUploadOptions = import('miniprogram-ci/dist/@types/ci/upload').IUploadOptions;
+interface WechatUploadResult {
+  devPluginId?: string;
+  pluginInfo?: { pluginProviderAppid: string; size: number; version: string; }[];
+  strUint64Version?: string;
+  subPackageInfo?: { name: string; size: number }[];
+}
 
 export const mpWeixinValidate = (config: UniDeployConfig) => {
   let isValid = true;
@@ -42,7 +49,7 @@ export const mpWeixinValidate = (config: UniDeployConfig) => {
 };
 
 export const mpWeixinGetProject = (config: UniDeployConfig) =>
-  new ci.Project({
+  new Project({
     ...config?.['mp-weixin'],
   } as WechatCreateProjectOptions);
 
@@ -52,6 +59,13 @@ export const mpWeixinUpload = async (config: UniDeployConfig, pRetryOptions?: PR
       ci.upload({
         ...config?.['mp-weixin'],
         project: mpWeixinGetProject(config),
+        onProgressUpdate: config?.['mp-weixin']?.onProgressUpdate || ((task) => {
+          if (typeof task === 'string') {
+            logger.debug(`【微信小程序】${task}`);
+          } else {
+            logger.debug(`【微信小程序】${task.message} (${task.status})`);
+          }
+        }),
       } as WechatUploadOptions),
     pRetryOptions,
   ) as Promise<WechatUploadResult>;
@@ -62,6 +76,13 @@ export const mpWeixinPreview = async (config: UniDeployConfig, pRetryOptions?: P
       ci.preview({
         ...config?.['mp-weixin'],
         project: mpWeixinGetProject(config),
+        onProgressUpdate: config?.['mp-weixin']?.onProgressUpdate || ((task) => {
+          if (typeof task === 'string') {
+            logger.debug(`【微信小程序】${task}`);
+          } else {
+            logger.debug(`【微信小程序】${task.message} (${task.status})`);
+          }
+        }),
       } as WechatUploadOptions & { test?: true }),
     pRetryOptions,
   );
