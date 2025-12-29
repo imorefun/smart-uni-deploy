@@ -2,8 +2,8 @@ import { Command } from 'commander';
 import updateNotifier from 'update-notifier';
 import pkg from '../package.json';
 import { loadConfig } from './config';
-import { imNotifyPreview, imNotifyUpload, imsValidate } from './im';
-import { platformPreview, platformMap, platforms, platformsValidate, platformUpload } from './platform';
+import { imNotifyPreview, imNotifyUpload, imsValidate } from './im/index.js';
+import { platformMap, platformPreview, platforms, platformsValidate, platformUpload } from './platform';
 import { logger } from './utils';
 import type { Im, Platform } from './types';
 
@@ -19,17 +19,20 @@ program
     platformsValidate(config);
     imsValidate(config);
   });
-
+interface UploadOptions {
+  debug?: boolean;
+  retry?: string; // commander 默认解析为字符串
+}
 program
   .command('upload')
   .description('上传')
-  .option('--retry <count>', '失败重试次数，范围1-99，默认3', parseInt)
+  .option('--retry <count>', '失败重试次数，范围1-99，默认3', Number.parseInt)
   .option('--debug', '启用调试模式，显示详细日志')
-  .action(async (options) => {
+  .action(async (options:UploadOptions) => {
     const config = await loadConfig();
     // 验证retry参数
-    let retryCount = options.retry || 3;
-    retryCount = Math.max(1, Math.min(99, retryCount));
+    let retryCount = options.retry ?? 3;
+    retryCount = Math.max(1, Math.min(99, typeof retryCount === "number" ? retryCount :3));
 
     // 设置调试模式
     const debugMode = Boolean(options.debug);
@@ -76,19 +79,19 @@ program
     ) as Im[];
 
     // 逐个通知
-    const allImNotifications: { platform: Platform; im: Im; success: boolean; error?: Error }[] = [];
-    for (let i = 0; i < validPlatforms.length; i++) {
+    const allImNotifications: { error?: Error; im: Im; platform: Platform; success: boolean }[] = [];
+    for (const [i, validPlatform] of validPlatforms.entries()) {
       if (uploadResults[i]) {
         for (const im of ims) {
           try {
-            await imNotifyUpload(config, im, validPlatforms[i], uploadResults[i]);
-            logger.success(`【${im}】通知【${platformMap[validPlatforms[i]]}】上传结果成功`);
-            allImNotifications.push({ platform: validPlatforms[i], im, success: true });
+            await imNotifyUpload(config, im, validPlatform, uploadResults[i]);
+            logger.success(`【${im}】通知【${platformMap[validPlatform]}】上传结果成功`);
+            allImNotifications.push({ im, platform: validPlatform, success: true });
           } catch (error) {
-            logger.error(`【${im}】通知【${platformMap[validPlatforms[i]]}】上传结果失败`);
+            logger.error(`【${im}】通知【${platformMap[validPlatform]}】上传结果失败`);
             if (error instanceof Error) {
               logger.error(`错误信息: ${error.message}`);
-              allImNotifications.push({ platform: validPlatforms[i], im, success: false, error });
+              allImNotifications.push({ error, im, platform: validPlatform, success: false, });
             }
           }
         }
@@ -139,7 +142,7 @@ program
 program
   .command('preview')
   .description('预览')
-  .option('--retry <count>', '失败重试次数，范围1-99，默认3', parseInt)
+  .option('--retry <count>', '失败重试次数，范围1-99，默认3', Number.parseInt)
   .option('--debug', '启用调试模式，显示详细日志')
   .action(async (options) => {
     const config = await loadConfig();
@@ -192,19 +195,19 @@ program
     ) as Im[];
 
     // 逐个通知
-    const allImNotifications: { platform: Platform; im: Im; success: boolean; error?: Error }[] = [];
-    for (let i = 0; i < validPlatforms.length; i++) {
+    const allImNotifications: { error?: Error; im: Im; platform: Platform; success: boolean; }[] = [];
+    for (const [i, validPlatform] of validPlatforms.entries()) {
       if (previewResults[i]) {
         for (const im of ims) {
           try {
-            await imNotifyPreview(config, im, validPlatforms[i], previewResults[i]);
-            logger.success(`【${im}】通知【${platformMap[validPlatforms[i]]}】预览结果成功`);
-            allImNotifications.push({ platform: validPlatforms[i], im, success: true });
+            await imNotifyPreview(config, im, validPlatform, previewResults[i]);
+            logger.success(`【${im}】通知【${platformMap[validPlatform]}】预览结果成功`);
+            allImNotifications.push({ im, platform: validPlatform, success: true });
           } catch (error) {
-            logger.error(`【${im}】通知【${platformMap[validPlatforms[i]]}】预览结果失败`);
+            logger.error(`【${im}】通知【${platformMap[validPlatform]}】预览结果失败`);
             if (error instanceof Error) {
               logger.error(`错误信息: ${error.message}`);
-              allImNotifications.push({ platform: validPlatforms[i], im, success: false, error });
+              allImNotifications.push({ error, im, platform: validPlatform, success: false });
             }
           }
         }
@@ -282,7 +285,7 @@ program
     // 测试IM通知
     logger.info(`开始测试IM通知，共${validIms.length}个渠道...`);
     const testResult = '测试消息';
-    const testPlatform = platforms[0] as Platform; // 使用第一个平台作为测试平台
+    const testPlatform = platforms[0]; // 使用第一个平台作为测试平台
 
     const successIms: Im[] = [];
     const failedIms: Im[] = [];

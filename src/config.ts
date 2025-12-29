@@ -29,7 +29,7 @@ export const loadEnvConfig = () => {
       webhook: process.env.WECOM_WEBHOOK,
     },
   };
-  return JSON.parse(JSON.stringify(envConfig)) as UniDeployUserConfig;
+  return structuredClone(envConfig) as UniDeployUserConfig;
 };
 
 export const loadConfig = async (inlineConfig: UniDeployUserConfig = {}, cwd = process.cwd()) => {
@@ -146,5 +146,5 @@ export const loadConfig = async (inlineConfig: UniDeployUserConfig = {}, cwd = p
     },
   };
 
-  return JSON.parse(JSON.stringify(resolved));
+  return structuredClone(resolved);
 };
